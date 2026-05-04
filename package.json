@@ -1,0 +1,35 @@
+{
+  "name": "zacipaci",
+  "private": true,
+  "version": "0.0.0",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview",
+    "test": "vitest"
+  },
+  "dependencies": {
+    "@emailjs/browser": "^4.4.1",
+    "@primeuix/themes": "^2.0.3",
+    "@supabase/supabase-js": "^2.104.1",
+    "@tailwindcss/vite": "^4.2.1",
+    "axios": "^1.13.6",
+    "chart.js": "^4.5.1",
+    "jsbarcode": "^3.12.3",
+    "pinia": "^3.0.4",
+    "primevue": "^4.5.4",
+    "vue": "^3.5.25",
+    "vue-router": "^5.0.3"
+  },
+  "devDependencies": {
+    "@vitejs/plugin-vue": "^6.0.6",
+    "@vue/test-utils": "^2.4.10",
+    "autoprefixer": "^10.4.27",
+    "jsdom": "^29.1.1",
+    "postcss": "^8.5.8",
+    "tailwindcss": "^4.2.1",
+    "vite": "^7.3.1",
+    "vitest": "^4.1.5"
+  }
+}

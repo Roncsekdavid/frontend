@@ -1,0 +1,37 @@
+@import "tailwindcss";
+@variant dark (&:where(.dark, .dark *));
+
+:root {
+  font-family: system-ui, Avenir, Helvetica, Arial, sans-serif;
+  line-height: 1.5;
+  font-weight: 400;
+}
+
+body{
+  margin: 0px;
+}
+
+ul li{
+  list-style-type: none;
+}
+
+a{
+  text-decoration: none;
+}
+
+button{
+  cursor: pointer;
+}
+
+
+.royal-blue{
+  background: #1A4D8F;
+}
+
+.deep-navy{
+  background: #0A1A2F;
+}
+
+.sapphire-blue{
+  background: #255C99;
+}
