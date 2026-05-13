@@ -75,4 +75,18 @@ export default class Items{
      setCategory(category){
         this.#category = category;
      }
+
+    static fromApi(data) {
+        return new Items(
+            data.id,
+            data.description,
+            data.estimated_value,
+            data.user_id,
+            data.status,
+            data.name,
+            data.upload_date,
+            data.category,
+            data.item_images ?? []
+        )
+    }
 }

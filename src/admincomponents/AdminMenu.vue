@@ -1,4 +1,4 @@
-<script setup>
+﻿<script setup>
 import { ref } from 'vue';
 
 
@@ -67,6 +67,22 @@ const toggleMobileMenu = () => {
                     class="absolute left-0 -bottom-1 h-[2px] w-0 bg-green-400 transition-all duration-300 group-hover:w-full">
                 </span>
             </div>
+            <div
+                class="menu-item text-center text-white text-2xl mt-10 animate__animated animate__fadeInDown relative cursor-pointer group">
+                <p class="border-[#F7F8F0] pb-1 hover:color-green-400"><router-link to="/admin/sales">Eladások</router-link>
+                </p>
+                <span
+                    class="absolute left-0 -bottom-1 h-[2px] w-0 bg-green-400 transition-all duration-300 group-hover:w-full">
+                </span>
+            </div>
+            <div
+                class="menu-item text-center text-white text-2xl mt-10 animate__animated animate__fadeInDown relative cursor-pointer group">
+                <p class="border-[#F7F8F0] pb-1 hover:color-green-400"><router-link to="/admin/news">Hírek</router-link>
+                </p>
+                <span
+                    class="absolute left-0 -bottom-1 h-[2px] w-0 bg-green-400 transition-all duration-300 group-hover:w-full">
+                </span>
+            </div>
         </div>
 
     </aside>
@@ -93,17 +109,17 @@ const toggleMobileMenu = () => {
                 <div
                     class="menu-item text-center text-white text-2xl mt-10 animate__animated animate__fadeInDown relative cursor-pointer group w-full">
                     <p class="border-[#F7F8F0] pb-1 hover:color-green-400"><router-link
-                            to="/admin">Tárgyak</router-link></p>
+                            to="/admin/items">Tárgyak</router-link></p>
                 </div>
                 <div
                     class="menu-item text-center text-white text-2xl mt-10 animate__animated animate__fadeInDown relative cursor-pointer group w-full">
                     <p class="border-[#F7F8F0] pb-1 hover:color-green-400"><router-link
-                            to="/admin">Beolvasás</router-link></p>
+                            to="/admin/readoffer">Beolvasás</router-link></p>
                 </div>
                 <div
                     class="menu-item text-center text-white text-2xl mt-10 animate__animated animate__fadeInDown relative cursor-pointer group w-full">
                     <p class="border-[#F7F8F0] pb-1 hover:color-green-400"><router-link
-                            to="/admin">Ügyfelek</router-link></p>
+                            to="/admin/users">Ügyfelek</router-link></p>
                 </div>
                 <div
                     class="menu-item text-center text-white text-2xl mt-10 animate__animated animate__fadeInDown relative cursor-pointer group w-full">
@@ -115,6 +131,17 @@ const toggleMobileMenu = () => {
                     <p class="border-[#F7F8F0] pb-1 hover:color-green-400"><router-link
                             to="/admin/loans">Hitelek</router-link></p>
                 </div>
+                <div
+                    class="menu-item text-center text-white text-2xl mt-10 animate__animated animate__fadeInDown relative cursor-pointer group w-full">
+                    <p class="border-[#F7F8F0] pb-1 hover:color-green-400"><router-link
+                            to="/admin/sales">Eladások</router-link></p>
+                </div>
+                <div
+                    class="menu-item text-center text-white text-2xl mt-10 animate__animated animate__fadeInDown relative cursor-pointer group w-full">
+                    <p class="border-[#F7F8F0] pb-1 hover:color-green-400"><router-link
+                            to="/admin/news">Hírek</router-link></p>
+                </div>
+                
             </div>
         </aside>
     </transition>

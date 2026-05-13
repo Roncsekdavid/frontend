@@ -17,15 +17,31 @@ function renderChart() {
   const approvedItems = adminStore.getApprovedItems();
   if (!approvedItems || approvedItems.length === 0) return;
 
-  adminStore.calculateAmountOfCategories()
-  const categoryOfItems = adminStore.getCategoryOfItems()
+  adminStore.calculateAmountOfCategories();
+  const categoryOfItems = adminStore.getCategoryOfItems();
 
-  const labels = []
-  const values = []
+  const labels = [];
+  const values = [];
+  const backgroundColors = [];
+
+  // Alapértelmezett kék árnyalatok a többi kategóriának
+  const blueShades = [
+    "#1A4D8F", "#255C99", "#0A1A2F", "#3A6EA5", 
+    "#5B8CC0", "#2F4A6D", "#6FA8DC", "#7BA4D9"
+  ];
 
   for (let i = 0; i < categoryOfItems.length; i++) {
-    labels.push(categoryOfItems[i].getCategory())
-    values.push(categoryOfItems[i].getAmount())
+    const categoryName = categoryOfItems[i].getCategory();
+    labels.push(categoryName);
+    values.push(categoryOfItems[i].getAmount());
+
+    // Dinamikus színkiosztás: ha Ékszer & Arany, akkor arany, egyébként kék
+    if (categoryName === "Ékszer & Arany") {
+      backgroundColors.push("#D4AF37");
+    } else {
+      // Kiveszünk egy színt a kék listából (vagy maradékos osztással pörgünk rajta)
+      backgroundColors.push(blueShades[i % blueShades.length]);
+    }
   }
 
   if (chartInstance) chartInstance.destroy();
@@ -35,11 +51,7 @@ function renderChart() {
       labels: labels,
       datasets: [{
         data: values,
-        backgroundColor: [
-          "#D4AF37", "#1A4D8F", "#255C99", "#0A1A2F",
-          "#A7C7E7", "#6FA8DC", "#8EC5FC", "#3A6EA5",
-          "#B4C7E7", "#7BA4D9", "#5B8CC0", "#2F4A6D"
-        ],
+        backgroundColor: backgroundColors, // Itt már a dinamikus tömböt használjuk
         borderWidth: 2,
         borderColor: "#ffffff",
         hoverOffset: 14,
@@ -49,28 +61,20 @@ function renderChart() {
     options: {
       responsive: true,
       maintainAspectRatio: false,
+      // ... a többi opció változatlan
       plugins: {
-        legend: {
-          display: false
-        },
+        legend: { display: false },
         title: {
           display: true,
           text: "Tárgyak mennyisége kategóriákra bontva",
           color: "#0A1A2F",
-          font: {
-            size: 20,
-            weight: "bold",
-            family: "Inter, sans-serif"
-          },
+          font: { size: 20, weight: "bold", family: "Inter, sans-serif" },
           padding: 20
         },
         tooltip: {
           backgroundColor: "rgba(10, 26, 47, 0.9)",
-          titleColor: "#fff",
-          bodyColor: "#fff",
-          padding: 12,
-          borderWidth: 1,
           borderColor: "#D4AF37",
+          borderWidth: 1,
           cornerRadius: 8
         }
       },

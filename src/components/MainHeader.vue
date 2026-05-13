@@ -2,6 +2,7 @@
 import { onMounted, watch } from 'vue';
 import { ref, computed } from 'vue';
 import { useAuthStore } from '../state/stateAuth';
+import { storeToRefs } from 'pinia';
 import { useDarkModeStore } from '../state/stateDarkMode';
 import { useRoute, useRouter } from 'vue-router';
 import { useCurrencyStore, CURRENCIES } from '../state/stateCurrency';
@@ -9,6 +10,7 @@ import api from '../services/api';
 
 const auth = useAuthStore();
 const darkModeStore = useDarkModeStore();
+const { userAvatarUrl: avatarUrl, userName } = storeToRefs(auth);
 const menuOpen = ref(false);
 const toggleMenu = () => { menuOpen.value = !menuOpen.value; };
 const closeMenu = () => { menuOpen.value = false; };
@@ -29,8 +31,9 @@ const handleLogout = async () => {
 };
 
 const firstName = computed(() => {
-  if (!auth.user?.name) return "Profil";
-  const parts = auth.user.name.trim().split(/\s+/);
+  if (!userName.value) return "Profil";
+  const parts = userName.value.trim().split(/\s+/);
+  if (parts.length === 1) return parts[0];
   if (parts.length === 2) return parts[1];
   return parts[Math.floor(parts.length / 2)];
 });
@@ -159,26 +162,6 @@ const selectedCode = computed({
               felvétele</router-link>
           </li>
 
-          <!-- <li>
-            <div class="currency-box">
-              <div class="currency-select-wrap">
-                <select v-model="selectedCode" class="currency-select" aria-label="Valuta választó">
-                  <option v-for="cur in CURRENCIES" :key="cur.code" :value="cur.code">
-                    {{ cur.code }} {{ cur.flag }}
-                  </option>
-                </select>
-                <i class="bi bi-chevron-down currency-arrow"></i>
-              </div>
-              <transition name="fade">
-                <span v-if="currencyStore.loading" class="currency-rate currency-loading">…</span>
-                <span v-else-if="currencyStore.exchangeRate" class="currency-rate">
-                  1 {{ currencyStore.selectedCode }} = {{ currencyStore.exchangeRate }} Ft
-                </span>
-                <span v-else class="currency-rate opacity-0">–</span>
-              </transition>
-            </div>
-          </li> -->
-
           <li v-if="auth.isLoggedIn" class="relative" id="notification-dropdown-wrap">
             <button @click.stop="toggleNotifications"
               class="relative w-11 h-11 rounded-full border-2 border-[#E5B326] bg-white dark:bg-[#26211E] text-[#4A2E23] dark:text-[#E5B326] flex items-center justify-center shadow-[3px_3px_0px_#4A2E23] dark:shadow-[3px_3px_0px_#E5B326] hover:translate-y-[-2px] transition-all">
@@ -255,8 +238,9 @@ const selectedCode = computed({
               <div class="flex items-center rounded-full overflow-hidden shadow-[0_2px_8px_rgba(229,179,38,0.35)]"
                 style="background:linear-gradient(135deg,#E5B326,#c8960e)">
                 <router-link to="/profil"
-                  class="profil-oval-link flex items-center gap-2 no-underline px-5 py-2 hover:brightness-110 transition-all">
-                  <i class="bi bi-person-circle text-lg"></i>
+                  class="profil-oval-link flex items-center gap-2 no-underline px-4 py-1.5 hover:brightness-110 transition-all">
+                  <img v-if="avatarUrl" :src="avatarUrl" class="w-7 h-7 rounded-full object-cover border border-white/50 flex-shrink-0" alt="Profilkép" />
+                  <i v-else class="bi bi-person-circle text-lg"></i>
                   {{ firstName }}
                 </router-link>
                 <div class="w-px h-6 bg-white/30"></div>
@@ -424,7 +408,8 @@ const selectedCode = computed({
               <router-link to="/profil"
                 class="mobile-nav-item flex-1 flex items-center gap-2 text-[#4A2E23] dark:text-[#D4C7B0] hover:text-[#c8960e] dark:hover:text-[#E5B326] border-b-0"
                 @click="closeMenu">
-                <i class="bi bi-person-circle text-lg text-[#E5B326]"></i>
+                <img v-if="avatarUrl" :src="avatarUrl" class="w-7 h-7 rounded-full object-cover border-2 border-[#E5B326] flex-shrink-0" alt="Profilkép" />
+                <i v-else class="bi bi-person-circle text-lg text-[#E5B326]"></i>
                 {{ firstName }}
               </router-link>
               <button @click="mobileDropdownOpen = !mobileDropdownOpen"

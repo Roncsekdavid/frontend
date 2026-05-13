@@ -119,8 +119,6 @@ onMounted(async () => {
                 </div>
 
                 <div v-else-if="state.getSelectedOffer()" class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-
-                    <!-- BAL OLDAL (AJÁNLAT + KÉPEK) -->
                     <div class="bg-white border-2 border-[#051826] rounded-3xl p-6 shadow-[6px_6px_0px_#051826]">
 
                         <div class="flex items-center gap-3 mb-5">
@@ -130,7 +128,6 @@ onMounted(async () => {
                             <span class="font-bold text-[#051826] text-lg">Ajánlat adatai</span>
                         </div>
 
-                        <!-- KÉPEK -->
                         <div class="mb-5">
                             <div v-if="state.getSelectedOffer().getItem().getItemImages()?.length">
 
@@ -151,7 +148,6 @@ onMounted(async () => {
                             </div>
                         </div>
 
-                        <!-- ADATOK -->
                         <div class="space-y-3">
                             <div class="bg-[#F7F8F0] rounded-xl p-4">
                                 <p class="text-xs font-bold text-[#051826]/40 uppercase mb-1">Tárgy neve</p>
@@ -193,7 +189,6 @@ onMounted(async () => {
                         </div>
                     </div>
 
-                    <!-- JOBB OLDAL (FORM) -->
                     <div class="bg-white border-2 border-[#051826] rounded-3xl p-6 shadow-[6px_6px_0px_#051826]">
                         <div class="flex items-center gap-3 mb-5">
                             <div class="w-10 h-10 bg-[#051826] rounded-xl flex items-center justify-center">

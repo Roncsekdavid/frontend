@@ -1,6 +1,7 @@
 <script setup>
 import { ref, computed, onMounted } from 'vue'
 import ItemCard from './ItemCard.vue'
+import Items from '../classes/Items'
 import api from '../services/api'
 
 const categories = [
@@ -26,8 +27,8 @@ const selectedCategory = ref('')
 
 const filteredAllItems = computed(() => {
   return allItems.value.filter(item => {
-    const matchesName = item.name?.toLowerCase().includes(searchQuery.value.toLowerCase())
-    const matchesCat = selectedCategory.value === '' || item.category === selectedCategory.value
+    const matchesName = item.getName()?.toLowerCase().includes(searchQuery.value.toLowerCase())
+    const matchesCat = selectedCategory.value === '' || item.getCategory() === selectedCategory.value
     return matchesName && matchesCat
   })
 })
@@ -35,7 +36,7 @@ const filteredAllItems = computed(() => {
 onMounted(async () => {
   try {
     const { data } = await api.get('/items/for-sale')
-    allItems.value = data
+    allItems.value = data.map(i => Items.fromApi(i))
   } catch (err) {
     console.error('[BongeszesKinalatban] Betöltése sikertelen:', err)
     allError.value = true
@@ -57,27 +58,25 @@ onMounted(async () => {
       </div>
 
       <div class="flex flex-col sm:flex-row gap-3 mb-8 max-w-2xl mx-auto">
-        <div class="flex-1 flex items-center bg-[#FBF5E9] dark:bg-[#26211E] border-2 border-gray-200 dark:border-[#E5B326]/20 rounded-2xl px-4 focus-within:border-[#E5B326] transition-all">
+        <div
+          class="flex-1 flex items-center bg-[#FBF5E9] dark:bg-[#26211E] border-2 border-gray-200 dark:border-[#E5B326]/20 rounded-2xl px-4 focus-within:border-[#E5B326] transition-all">
           <i class="bi bi-search text-[#4A2E23]/40 dark:text-[#E5B326]/40 mr-3"></i>
-          <input
-            v-model="searchQuery"
-            type="text"
-            placeholder="Keresés név alapján..."
-            class="w-full py-3.5 bg-transparent text-[#4A2E23] dark:text-[#FBF5E9] font-bold placeholder:text-gray-400 placeholder:font-normal outline-none text-sm"
-          />
-          <button v-if="searchQuery" @click="searchQuery = ''" class="text-gray-400 hover:text-[#4A2E23] dark:hover:text-[#E5B326] transition-colors">
+          <input v-model="searchQuery" type="text" placeholder="Keresés név alapján..."
+            class="w-full py-3.5 bg-transparent text-[#4A2E23] dark:text-[#FBF5E9] font-bold placeholder:text-gray-400 placeholder:font-normal outline-none text-sm" />
+          <button v-if="searchQuery" @click="searchQuery = ''"
+            class="text-gray-400 hover:text-[#4A2E23] dark:hover:text-[#E5B326] transition-colors">
             <i class="bi bi-x-lg text-sm"></i>
           </button>
         </div>
 
         <div class="relative">
-          <select
-            v-model="selectedCategory"
+          <select v-model="selectedCategory"
             class="appearance-none bg-[#FBF5E9] dark:bg-[#26211E] border-2 border-gray-200 dark:border-[#E5B326]/20 rounded-2xl px-4 pr-10 py-3.5 text-[#4A2E23] dark:text-[#FBF5E9] font-bold text-sm outline-none focus:border-[#E5B326] transition-all w-full sm:w-auto cursor-pointer">
             <option value="">Minden kategória</option>
             <option v-for="cat in categories" :key="cat.name" :value="cat.name">{{ cat.name }}</option>
           </select>
-          <i class="bi bi-chevron-down absolute right-3 top-1/2 -translate-y-1/2 text-[#4A2E23] dark:text-[#E5B326] pointer-events-none text-sm"></i>
+          <i
+            class="bi bi-chevron-down absolute right-3 top-1/2 -translate-y-1/2 text-[#4A2E23] dark:text-[#E5B326] pointer-events-none text-sm"></i>
         </div>
       </div>
 
@@ -86,13 +85,15 @@ onMounted(async () => {
           class="flex items-center gap-2 bg-[#E5B326]/20 text-[#4A2E23] dark:text-[#FBF5E9] text-xs font-bold px-3 py-1.5 rounded-full border border-[#E5B326]/40">
           <i class="bi bi-search text-[#E5B326]"></i>
           "{{ searchQuery }}"
-          <button @click="searchQuery = ''" class="hover:text-red-500 transition-colors"><i class="bi bi-x"></i></button>
+          <button @click="searchQuery = ''" class="hover:text-red-500 transition-colors"><i
+              class="bi bi-x"></i></button>
         </span>
         <span v-if="selectedCategory"
           class="flex items-center gap-2 bg-[#E5B326]/20 text-[#4A2E23] dark:text-[#FBF5E9] text-xs font-bold px-3 py-1.5 rounded-full border border-[#E5B326]/40">
           <i class="bi bi-tag-fill text-[#E5B326]"></i>
           {{ selectedCategory }}
-          <button @click="selectedCategory = ''" class="hover:text-red-500 transition-colors"><i class="bi bi-x"></i></button>
+          <button @click="selectedCategory = ''" class="hover:text-red-500 transition-colors"><i
+              class="bi bi-x"></i></button>
         </span>
         <span class="text-xs text-[#4A2E23]/50 dark:text-[#D4C7B0] font-bold self-center">
           {{ filteredAllItems.length }} találat
@@ -125,7 +126,7 @@ onMounted(async () => {
       </div>
 
       <div v-else class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-5">
-        <ItemCard v-for="item in filteredAllItems" :key="item.id" :item="item" />
+        <ItemCard v-for="item in filteredAllItems" :key="item.getId()" :item="item" />
       </div>
 
     </div>

@@ -36,18 +36,18 @@ const currency = computed({
 });
 
 const categories = ref([
-    { name: 'Ékszer & Arany',      icon: 'bi-gem',              selected: false },
-    { name: 'Órák',                icon: 'bi-watch',             selected: false },
-    { name: 'Műtárgyak',           icon: 'bi-palette-fill',      selected: false },
-    { name: 'Elektronika',         icon: 'bi-cpu-fill',          selected: false },
-    { name: 'Háztartási gépek',    icon: 'bi-house-gear-fill',   selected: false },
-    { name: 'Hétköznapi cikkek',   icon: 'bi-box-seam-fill',     selected: false },
-    { name: 'Hangszerek',          icon: 'bi-music-note-beamed', selected: false },
-    { name: 'Jármű',               icon: 'bi-car-front-fill',    selected: false },
-    { name: 'Szerszámgépek',       icon: 'bi-tools',             selected: false },
-    { name: 'Játékkonzolok',       icon: 'bi-controller',        selected: false },
-    { name: 'Bútorok',             icon: 'bi-lamp-fill',         selected: false },
-    { name: 'Sporteszközök',       icon: 'bi-bicycle',           selected: false }
+    { name: 'Ékszer & Arany', icon: 'bi-gem', selected: false },
+    { name: 'Órák', icon: 'bi-watch', selected: false },
+    { name: 'Műtárgyak', icon: 'bi-palette-fill', selected: false },
+    { name: 'Elektronika', icon: 'bi-cpu-fill', selected: false },
+    { name: 'Háztartási gépek', icon: 'bi-house-gear-fill', selected: false },
+    { name: 'Hétköznapi cikkek', icon: 'bi-box-seam-fill', selected: false },
+    { name: 'Hangszerek', icon: 'bi-music-note-beamed', selected: false },
+    { name: 'Jármű', icon: 'bi-car-front-fill', selected: false },
+    { name: 'Szerszámgépek', icon: 'bi-tools', selected: false },
+    { name: 'Játékkonzolok', icon: 'bi-controller', selected: false },
+    { name: 'Bútorok', icon: 'bi-lamp-fill', selected: false },
+    { name: 'Sporteszközök', icon: 'bi-bicycle', selected: false }
 ]);
 
 watch(phone, (newValue) => {
@@ -102,41 +102,33 @@ const handleSave = async () => {
 
 onMounted(async () => {
     await auth.fetchUser();
-    if (auth.user.favorites) {
-    categories.value.forEach(cat => {
-        cat.selected = auth.user.favorites.includes(cat.name);
-    });
 
-    favoritesStore.setFavorites(auth.user.favorites);
-}
-
-console.log('auth.user:', auth.user)
-console.log('favorites:', auth.user.favorites)
     if (auth.user) {
-        name.value = auth.user.name;
-        email.value = auth.user.email;
-        phone.value = auth.user.phone;
+        name.value = auth.user.getName();
+        email.value = auth.user.getEmail();
+        phone.value = auth.user.getPhone();
 
-        originalName.value = auth.user.name;
-        originalPhone.value = auth.user.phone;
+        originalName.value = auth.user.getName();
+        originalPhone.value = auth.user.getPhone();
 
         if (auth.user.currency && auth.user.currency !== currencyStore.selectedCode) {
             await currencyStore.setCurrency(auth.user.currency);
         }
 
-        if (auth.user.favorites) {
+        const favorites = favoritesStore.favoriteCategories;
+        if (favorites.length > 0) {
             categories.value.forEach(cat => {
-                cat.selected = auth.user.favorites.includes(cat.name);
+                cat.selected = favorites.includes(cat.name);
             });
-            originalCategories.value = [...auth.user.favorites];
-            favoritesStore.setFavorites(auth.user.favorites);
+            originalCategories.value = [...favorites];
         }
     }
 });
 </script>
 
 <template>
-    <div class="bg-white dark:bg-[#26211E] border-2 border-[#4A2E23] dark:border-[#E5B326] rounded-[30px] md:rounded-[40px] p-6 md:p-10 shadow-[8px_8px_0px_#4A2E23] dark:shadow-[8px_8px_0px_#E5B326] transition-colors">
+    <div
+        class="bg-white dark:bg-[#26211E] border-2 border-[#4A2E23] dark:border-[#E5B326] rounded-[30px] md:rounded-[40px] p-6 md:p-10 shadow-[8px_8px_0px_#4A2E23] dark:shadow-[8px_8px_0px_#E5B326] transition-colors">
 
         <h2 class="text-2xl md:text-3xl font-black text-[#4A2E23] dark:text-[#E5B326] uppercase mb-8 flex items-center">
             <i class="bi bi-person-gear mr-3 md:mr-4 text-[#E5B326]"></i> Profilbeállítások
@@ -147,27 +139,35 @@ console.log('favorites:', auth.user.favorites)
             <div class="space-y-5 md:space-y-6">
 
                 <div class="space-y-2">
-                    <label class="block font-bold text-[#4A2E23] dark:text-[#FBF5E9] ml-1 text-sm md:text-base flex items-center gap-2">
+                    <label
+                        class="block font-bold text-[#4A2E23] dark:text-[#FBF5E9] ml-1 text-sm md:text-base flex items-center gap-2">
                         Teljes név
-                        <span v-if="nameDirty" class="text-[10px] font-black text-[#4A2E23] bg-[#E5B326] px-2 py-0.5 rounded-full uppercase tracking-wide">Mentés szükséges</span>
+                        <span v-if="nameDirty"
+                            class="text-[10px] font-black text-[#4A2E23] bg-[#E5B326] px-2 py-0.5 rounded-full uppercase tracking-wide">Mentés
+                            szükséges</span>
                     </label>
                     <input type="text" v-model="name"
                         class="w-full border-2 border-gray-200 dark:border-[#E5B326]/30 rounded-2xl px-4 py-3 focus:border-[#E5B326] outline-none transition-all font-semibold bg-white dark:bg-[#1A1614] text-[#4A2E23] dark:text-[#FBF5E9]" />
                 </div>
 
                 <div class="space-y-2 relative">
-                    <label class="block font-bold text-[#4A2E23] dark:text-[#FBF5E9] ml-1 text-sm md:text-base">Email cím (nem módosítható)</label>
+                    <label class="block font-bold text-[#4A2E23] dark:text-[#FBF5E9] ml-1 text-sm md:text-base">Email
+                        cím (nem módosítható)</label>
                     <div class="relative">
                         <input type="email" v-model="email" readonly
                             class="w-full border-2 border-gray-100 dark:border-[#E5B326]/10 bg-gray-50 dark:bg-[#1A1614]/60 text-gray-400 dark:text-[#D4C7B0]/50 rounded-2xl px-4 py-3 cursor-not-allowed font-semibold outline-none" />
-                        <i class="bi bi-lock-fill absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 dark:text-[#D4C7B0]/40"></i>
+                        <i
+                            class="bi bi-lock-fill absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 dark:text-[#D4C7B0]/40"></i>
                     </div>
                 </div>
 
                 <div class="space-y-2">
-                    <label class="block font-bold text-[#4A2E23] dark:text-[#FBF5E9] ml-1 text-sm md:text-base flex items-center gap-2">
+                    <label
+                        class="block font-bold text-[#4A2E23] dark:text-[#FBF5E9] ml-1 text-sm md:text-base flex items-center gap-2">
                         Telefonszám
-                        <span v-if="phoneDirty" class="text-[10px] font-black text-[#4A2E23] bg-[#E5B326] px-2 py-0.5 rounded-full uppercase tracking-wide">Mentés szükséges</span>
+                        <span v-if="phoneDirty"
+                            class="text-[10px] font-black text-[#4A2E23] bg-[#E5B326] px-2 py-0.5 rounded-full uppercase tracking-wide">Mentés
+                            szükséges</span>
                     </label>
                     <input type="text" v-model="phone"
                         class="w-full border-2 rounded-2xl px-4 py-3 focus:border-[#E5B326] outline-none transition-all font-semibold bg-white dark:bg-[#1A1614] text-[#4A2E23] dark:text-[#FBF5E9]"
@@ -180,7 +180,8 @@ console.log('favorites:', auth.user.favorites)
                 </div>
 
                 <div class="space-y-2">
-                    <label class="block font-bold text-[#4A2E23] dark:text-[#FBF5E9] ml-1 text-sm md:text-base">Valuta</label>
+                    <label
+                        class="block font-bold text-[#4A2E23] dark:text-[#FBF5E9] ml-1 text-sm md:text-base">Valuta</label>
                     <div class="relative">
                         <select v-model="currency"
                             class="w-full border-2 border-gray-200 dark:border-[#E5B326]/30 rounded-2xl px-4 py-3 focus:border-[#E5B326] outline-none appearance-none bg-white dark:bg-[#1A1614] text-[#4A2E23] dark:text-[#FBF5E9] font-semibold transition-colors">
@@ -188,11 +189,13 @@ console.log('favorites:', auth.user.favorites)
                                 {{ cur.code }} - {{ cur.label }}
                             </option>
                         </select>
-                        <i class="bi bi-chevron-down absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 dark:text-[#D4C7B0]/60 pointer-events-none"></i>
+                        <i
+                            class="bi bi-chevron-down absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 dark:text-[#D4C7B0]/60 pointer-events-none"></i>
                     </div>
                 </div>
 
-                <div class="flex items-center justify-between p-5 bg-gray-50 dark:bg-[#1A1614] rounded-2xl border-2 border-[#4A2E23]/10 dark:border-[#E5B326]/20 transition-colors">
+                <div
+                    class="flex items-center justify-between p-5 bg-gray-50 dark:bg-[#1A1614] rounded-2xl border-2 border-[#4A2E23]/10 dark:border-[#E5B326]/20 transition-colors">
                     <div class="flex items-center gap-3">
                         <i class="bi text-xl"
                             :class="darkModeStore.isDark ? 'bi-moon-stars-fill text-[#E5B326]' : 'bi-sun-fill text-[#E5B326]'"></i>
@@ -210,18 +213,24 @@ console.log('favorites:', auth.user.favorites)
             </div>
 
             <div class="space-y-4">
-                <label class="block font-bold text-[#4A2E23] dark:text-[#FBF5E9] ml-1 text-sm md:text-base flex items-center gap-2">
+                <label
+                    class="block font-bold text-[#4A2E23] dark:text-[#FBF5E9] ml-1 text-sm md:text-base flex items-center gap-2">
                     Kedvenc kategóriák
-                    <span v-if="categoriesDirty" class="text-[10px] font-black text-[#4A2E23] bg-[#E5B326] px-2 py-0.5 rounded-full uppercase tracking-wide">Mentés szükséges</span>
+                    <span v-if="categoriesDirty"
+                        class="text-[10px] font-black text-[#4A2E23] bg-[#E5B326] px-2 py-0.5 rounded-full uppercase tracking-wide">Mentés
+                        szükséges</span>
                 </label>
-                <div class="grid grid-cols-2 sm:grid-cols-2 xl:grid-cols-3 gap-2 p-3 bg-gray-50 dark:bg-[#1A1614] rounded-[25px] border-2 border-[#4A2E23]/10 dark:border-[#E5B326]/20 transition-colors">
+                <div
+                    class="grid grid-cols-2 sm:grid-cols-2 xl:grid-cols-3 gap-2 p-3 bg-gray-50 dark:bg-[#1A1614] rounded-[25px] border-2 border-[#4A2E23]/10 dark:border-[#E5B326]/20 transition-colors">
                     <div v-for="cat in categories" :key="cat.name" @click="cat.selected = !cat.selected"
                         class="flex flex-col items-center justify-center p-2 rounded-xl border-2 transition-all cursor-pointer text-center group"
                         :class="cat.selected
                             ? 'border-[#E5B326] bg-[#E5B326]/10'
                             : 'bg-white dark:bg-[#26211E] border-gray-100 dark:border-[#E5B326]/10 hover:border-[#E5B326]/50'">
-                        <i :class="['bi', cat.icon, 'text-xl mb-1 transition-transform group-hover:scale-110', cat.selected ? 'text-[#E5B326]' : 'text-gray-400 dark:text-[#D4C7B0]/50']"></i>
-                        <span class="text-[11px] md:text-[12px] font-black leading-tight text-[#4A2E23] dark:text-[#FBF5E9] uppercase">
+                        <i
+                            :class="['bi', cat.icon, 'text-xl mb-1 transition-transform group-hover:scale-110', cat.selected ? 'text-[#E5B326]' : 'text-gray-400 dark:text-[#D4C7B0]/50']"></i>
+                        <span
+                            class="text-[11px] md:text-[12px] font-black leading-tight text-[#4A2E23] dark:text-[#FBF5E9] uppercase">
                             {{ cat.name }}
                         </span>
                         <input type="checkbox" v-model="cat.selected" class="hidden" />
@@ -248,12 +257,14 @@ console.log('favorites:', auth.user.favorites)
         <div v-if="showSuccessModal" class="fixed inset-0 z-50 flex items-center justify-center p-4"
             @click.self="showSuccessModal = false">
             <div class="absolute inset-0 bg-black/40 backdrop-blur-sm"></div>
-            <div class="relative bg-white dark:bg-[#26211E] border-2 border-[#4A2E23] dark:border-[#E5B326] rounded-[40px] p-10 shadow-[8px_8px_0px_#4A2E23] dark:shadow-[8px_8px_0px_#E5B326] max-w-sm w-full text-center space-y-6 transition-colors">
+            <div
+                class="relative bg-white dark:bg-[#26211E] border-2 border-[#4A2E23] dark:border-[#E5B326] rounded-[40px] p-10 shadow-[8px_8px_0px_#4A2E23] dark:shadow-[8px_8px_0px_#E5B326] max-w-sm w-full text-center space-y-6 transition-colors">
                 <div class="relative inline-block">
                     <div class="bg-[#E5B326] w-24 h-24 rounded-full flex items-center justify-center mx-auto shadow-lg">
                         <i class="bi bi-person-check-fill text-white text-5xl"></i>
                     </div>
-                    <div class="absolute -top-1 -right-1 bg-green-500 w-8 h-8 rounded-full border-4 border-white dark:border-[#26211E] flex items-center justify-center">
+                    <div
+                        class="absolute -top-1 -right-1 bg-green-500 w-8 h-8 rounded-full border-4 border-white dark:border-[#26211E] flex items-center justify-center">
                         <i class="bi bi-check text-white font-bold"></i>
                     </div>
                 </div>
@@ -276,15 +287,37 @@ console.log('favorites:', auth.user.favorites)
 .animate-shake {
     animation: shake 0.5s cubic-bezier(.36, .07, .19, .97) both;
 }
+
 @keyframes shake {
-    10%, 90% { transform: translate3d(-1px, 0, 0); }
-    20%, 80% { transform: translate3d(2px, 0, 0); }
-    30%, 50%, 70% { transform: translate3d(-4px, 0, 0); }
-    40%, 60% { transform: translate3d(4px, 0, 0); }
+
+    10%,
+    90% {
+        transform: translate3d(-1px, 0, 0);
+    }
+
+    20%,
+    80% {
+        transform: translate3d(2px, 0, 0);
+    }
+
+    30%,
+    50%,
+    70% {
+        transform: translate3d(-4px, 0, 0);
+    }
+
+    40%,
+    60% {
+        transform: translate3d(4px, 0, 0);
+    }
 }
+
 @keyframes spin {
-    to { transform: rotate(360deg); }
+    to {
+        transform: rotate(360deg);
+    }
 }
+
 .animate-spin {
     display: inline-block;
     animation: spin 0.8s linear infinite;

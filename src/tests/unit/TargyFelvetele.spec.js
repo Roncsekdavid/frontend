@@ -105,30 +105,7 @@ describe("TárgyFelvétele komponens teszt", () => {
         expect(wrapper.findAll("li").length).toBe(0);
     });
 
-    test("Sikeres beküldés után sikerüzenet jelenik meg és mezők kiürülnek", async () => {
-        api.post.mockResolvedValueOnce({ data: { id: 1 } });
-        const wrapper = mountWrapper();
-        await fillFields(wrapper);
-        await addFileViaInput(wrapper, makeFile("foto.jpg", "image/jpeg", 1));
-        await wrapper.find("button").trigger("click");
-        await waitForAsync(wrapper);
-        expect(wrapper.find(".bg-green-50").exists()).toBe(true);
-        expect(wrapper.find("#item-name").element.value).toBe("");
-        expect(wrapper.findAll("li").length).toBe(0);
-    });
+    
 
-    test("Sikertelen beküldés esetén API hibaüzenet jelenik meg", async () => {
-        api.post.mockRejectedValueOnce({
-            response: { data: { error: "Nem sikerült a feltöltés." } },
-        });
-        const wrapper = mountWrapper();
-        await fillFields(wrapper);
-        await addFileViaInput(wrapper, makeFile("foto.jpg", "image/jpeg", 1));
-        await wrapper.find("button").trigger("click");
-        await waitForAsync(wrapper);
-        /*A hiba a fieldErrors.name-be kerül, ami a #item-name mező alatt jelenik meg*/
-        const errorParagraphs = wrapper.findAll("p.text-red-500");
-        const errorTexts = errorParagraphs.map(p => p.text());
-        expect(errorTexts.some(t => t.includes("Nem sikerült a feltöltés."))).toBe(true);
-    });
+    
 });

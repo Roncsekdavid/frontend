@@ -5,6 +5,8 @@ import api from "../services/api";
 import Income from "../classes/Income";
 import Category from "../classes/Category";
 import User from "../classes/User";
+import Loans from "../classes/Loans";
+import Offer from "../classes/Offer";
 
 export const adminState = defineStore("adminState", () => {
   const submittedItems = ref([]);
@@ -16,9 +18,15 @@ export const adminState = defineStore("adminState", () => {
   const categoryOfItems = ref([]);
   const categoryValues = ref([]);
   const usersArray = ref([]);
-
-
+  const mostActiveUser = ref([]);
+  const newestAccount = ref([]);
+  const oldestAccount = ref([]);
   const selectedItem = ref(null);
+  const loans = ref([]);
+  const mostExpensiveOffer = ref([]);
+  const topExpensiveItems = ref([]);
+  const currentUser = ref(null);
+  const offers = ref([]);
 
   async function getSubmittedItemsFromApi() {
     submittedItems.value = [];
@@ -166,33 +174,32 @@ export const adminState = defineStore("adminState", () => {
     }
   }
 
-  function calculateIncomeByDate() {
-    incomeByDate.value = [];
+function calculateIncomeByDate() {
+  incomeByDate.value = [];
 
-    for (let i = 0; i < forSaleItems.value.length; i++) {
-      const item = forSaleItems.value[i];
-      const date = item.getUploadDate();
-      const income = item.getEstimatedValue();
+  for (let i = 0; i < forSaleItems.value.length; i++) {
+    const item = forSaleItems.value[i];
+    const date = item.getUploadDate();
+    const income = item.getEstimatedValue();
 
-      let found = false;
+    let found = false;
 
-      for (let j = 0; j < incomeByDate.value.length; j++) {
-        if (incomeByDate.value[j].getDate() === date) {
-          incomeByDate.value[j].setDate(
-            incomeByDate.value[j].getIncome() + income
-          );
-          found = true;
-        }
+    for (let j = 0; j < incomeByDate.value.length; j++) {
+      if (incomeByDate.value[j].getDate() === date) {
+        incomeByDate.value[j].setIncome(
+          incomeByDate.value[j].getIncome() + income
+        );
+        found = true;
       }
+    }
 
-      if (!found) {
-        const newIncome = new Income(date, income);
-        incomeByDate.value.push(newIncome);
-      }
-
-      sortIncomeByDate();
+    if (!found) {
+      const newIncome = new Income(date, income);
+      incomeByDate.value.push(newIncome);
     }
   }
+  sortIncomeByDate();
+}
 
   function calculateCategoryValues() {
     categoryValues.value = [];
@@ -229,21 +236,30 @@ export const adminState = defineStore("adminState", () => {
         if (a < b) {
           const temp = categoryValues.value[j];
           categoryValues.value[j] = categoryValues.value[j + 1];
-          categoryValues.value[j + 1] = temp; 
+          categoryValues.value[j + 1] = temp;
         }
       }
     }
   }
 
-  async function getUsersFromArray(){
+  async function getUsersFromApi() {
     usersArray.value = [];
     try {
       const { data } = await api.get("/users/all");
       for (let i = 0; i < data.length; i++) {
-        const user = new User(data[i].id, data[i].name, data[i].email, data[i].phone, data[i].auth_user_id, data[i].role, data[i].register_date); 
-        usersArray.value.push(user);       
+        const user = markRaw(new User(
+          data[i].id,
+          data[i].name,
+          data[i].email,
+          data[i].phone,
+          data[i].auth_user_id,
+          data[i].role,
+          data[i].register_date,
+          data[i].avatar_path,
+          data[i].avatar_url
+        ));
+        usersArray.value.push(user);
       }
-      
     } catch (error) {
       console.error(error);
     }
@@ -251,105 +267,267 @@ export const adminState = defineStore("adminState", () => {
 
   const newUsersByDate = ref([]);
 
-function calculateNewUsersByDate() {
-  newUsersByDate.value = [];
+  function calculateNewUsersByDate() {
+    newUsersByDate.value = [];
 
-  for (let i = 0; i < usersArray.value.length; i++) {
-    const user = usersArray.value[i];
-    const date = user.getRegisterDate(); 
+    for (let i = 0; i < usersArray.value.length; i++) {
+      const user = usersArray.value[i];
+      const date = user.getRegisterDate();
 
-    let found = false;
+      let found = false;
 
-    for (let j = 0; j < newUsersByDate.value.length; j++) {
-      if (newUsersByDate.value[j].date === date) {
-        newUsersByDate.value[j].count++;
-        found = true;
+      for (let j = 0; j < newUsersByDate.value.length; j++) {
+        if (newUsersByDate.value[j].date === date) {
+          newUsersByDate.value[j].count++;
+          found = true;
+        }
+      }
+
+      if (!found) {
+        newUsersByDate.value.push({
+          date: date,
+          count: 1,
+        });
       }
     }
 
-    if (!found) {
-      newUsersByDate.value.push({
-        date: date,
-        count: 1
-      });
+    newUsersByDate.value.sort((a, b) => new Date(a.date) - new Date(b.date));
+  }
+
+  async function getUserById(id) {
+    usersArray.value = [];
+    try {
+      const { data } = await api.get(`/users/${id}`);
+      const user = markRaw(new User(
+        data.id,
+        data.name,
+        data.email,
+        data.phone,
+        data.auth_user_id,
+        data.role,
+        data.register_date,
+        data.avatar_path,
+        data.avatar_url
+      ));
+      usersArray.value.push(user);
+    } catch (error) {
+      console.error("Hiba a user lekérésénél:", error);
+      return null;
     }
   }
 
-  newUsersByDate.value.sort((a, b) => new Date(a.date) - new Date(b.date));
-}
+  async function getMostActiveUserFromApi() {
+    mostActiveUser.value = [];
+    try {
+      const { data } = await api.get(`/users/most-active`);
 
-async function getUserById(id) {
-  usersArray.value = [];
+      const user = markRaw(new User(
+        data.user.id,
+        data.user.name,
+        data.user.email,
+        data.user.phone,
+        data.user.auth_user_id,
+        data.user.role,
+        data.user.register_date,
+        data.user.avatar_path,
+        data.user.avatar_url
+      ));
+      mostActiveUser.value.push(user);
+    } catch (error) {
+      console.error("Hiba a user lekérésénél:", error);
+      return null;
+    }
+  }
+
+    async function getMostExpensiveOfferFromApi() {
+  mostExpensiveOffer.value = []; 
+
   try {
-    const { data } = await api.get(`/users/${id}`);
-    const user = new User(
-      data.id,
-      data.name,
-      data.email,
-      data.phone,
-      data.auth_user_id,
-      data.role,
-      data.register_date
-    );
-    usersArray.value.push(user);
+    const { data } = await api.get(`/users/highest-offer-user`);
+    
+    if (data && data.user) {
+      const user = markRaw(new User(
+        data.user.id,
+        data.user.name,
+        data.user.email,
+        data.user.phone,
+        null,
+        data.user.role,
+        data.user.register_date,
+        data.user.avatar_path,
+        data.user.avatar_url
+      ));
+
+
+      mostExpensiveOffer.value.push(user);
+    }
   } catch (error) {
-    console.error("Hiba a user lekérésénél:", error);
-    return null;
+    console.error("Hiba a kiemelt user lekérésénél:", error);
   }
 }
 
-async function getItemsByUserId(id) {
-  try {
-    const { data } = await api.get(`/items/user/${id}`);
-
-    return data.map(item => ({
-      image: item.item_images?.[0]?.url ?? "../assets/default.png",
-      name: item.name,
-      uploader: item.user_name,
-      date: item.upload_date,
-      price: item.estimated_value + " Ft"
-    }));
-  } catch (error) {
-    console.error("Hiba a tárgyak lekérésénél:", error);
-    return [];
+  function getMostExpensiveOffer(){
+    return mostExpensiveOffer.value;
   }
-}
 
+  async function getNewestAccountFromApi() {
+    newestAccount.value = [];
+    try {
+      const { data } = await api.get(`/users/newest`);
 
+      const user = markRaw(new User(
+        data.user.id,
+        data.user.name,
+        data.user.email,
+        data.user.phone,
+        data.user.auth_user_id,
+        data.user.role,
+        data.user.register_date,
+        data.user.avatar_path,
+        data.user.avatar_url
+      ));
+      newestAccount.value.push(user);
+    } catch (error) {
+      console.error("Hiba a user lekérésénél:", error);
+      return null;
+    }
+  }
 
+  async function getOldestAccountFromApi() {
+    oldestAccount.value = [];
+    try {
+      const { data } = await api.get(`/users/oldest`);
 
-function getNewUsersByDate() {
-  return newUsersByDate.value;
-}
+      const user = markRaw(new User(
+        data.user.id,
+        data.user.name,
+        data.user.email,
+        data.user.phone,
+        data.user.auth_user_id,
+        data.user.role,
+        data.user.register_date,
+        data.user.avatar_path,
+        data.user.avatar_url
+      ));
+    
+      oldestAccount.value.push(user);
+    } catch (error) {
+      console.error("Hiba a user lekérésénél:", error);
+      return null;
+    }
+  }
 
+  async function getCurrentUserFromApi() {
+    currentUser.value = null;
+    try {
+      const { data } = await api.get("/users/me");
+      currentUser.value = markRaw(new User(
+        data.id,
+        data.name,
+        data.email,
+        data.phone,
+        data.auth_user_id,
+        data.role,
+        data.register_date,
+        data.avatar_path,
+        data.avatar_url
+      ));
+    } catch (error) {
+      console.error("Hiba a saját adatok lekérésekor:", error);
+    }
+  }
+
+  function getCurrentUser() {
+    return currentUser.value;
+  }
+
+  function getNewestAccount() {
+    return newestAccount.value;
+  }
+
+  function getOldestAccount() {
+    return oldestAccount.value;
+  }
+
+  function getMostActiveUser() {
+    return mostActiveUser.value;
+  }
+
+  function getMostActiveUser() {
+    return mostActiveUser.value;
+  }
+
+  function getNewestUser() {
+    return newestUser.value;
+  }
+
+  async function getItemsByUserId(id) {
+    try {
+      const { data } = await api.get(`/items/user/${id}`);
+
+      return data.map((item) => ({
+        id: item.id, 
+        image: item.item_images?.[0]?.url ?? "../assets/default.png",
+        name: item.name,
+        uploader: item.user_name,
+        date: item.upload_date,
+        price: item.estimated_value + " Ft",
+      }));
+    } catch (error) {
+      console.error("Hiba a tárgyak lekérésénél:", error);
+      return [];
+    }
+  }
+
+  function getNewUsersByDate() {
+    return newUsersByDate.value;
+  }
 
   async function fetchItemByIdAdmin(id) {
     try {
-      const res = await api.get(`/items/admin/${id}`)
-      const itemData = res.data
+      const res = await api.get(`/items/admin/${id}`);
+      const itemData = res.data;
 
-      selectedItem.value = markRaw(new Items(
-        itemData.id,
-        itemData.description,
-        itemData.estimated_value,
-        itemData.user_id,
-        itemData.status,
-        itemData.name,
-        itemData.upload_date,
-        itemData.category,
-        itemData.item_images
-      ))
+      selectedItem.value = markRaw(
+        new Items(
+          itemData.id,
+          itemData.description,
+          itemData.estimated_value,
+          itemData.user_id,
+          itemData.status,
+          itemData.name,
+          itemData.upload_date,
+          itemData.category,
+          itemData.item_images,
+        ),
+      );
 
-      return selectedItem.value
+      return selectedItem.value;
     } catch (error) {
-      console.error('[fetchItemByIdAdmin] hiba:', error)
-      selectedItem.value = null
-      throw error
+      console.error("[fetchItemByIdAdmin] hiba:", error);
+      selectedItem.value = null;
+      throw error;
     }
   }
 
+  async function getTopExpensiveItemsFromApi() {
+    topExpensiveItems.value = [];
+    try {
+      const { data } = await api.get("/items/top-expensive");
+      for (let i = 0; i < data.length; i++) {
+        topExpensiveItems.value.push(Items.fromApi(data[i]));
+      }
+    } catch (error) {
+      console.error("Hiba a legdrágább tárgyak lekérésekor:", error);
+    }
+  }
+
+  function getTopExpensiveItems() {
+    return topExpensiveItems.value;
+  }
+
   function getSelectedItem() {
-    return selectedItem.value
+    return selectedItem.value;
   }
 
   function getIncomeByDate() {
@@ -384,7 +562,7 @@ function getNewUsersByDate() {
     return approvedItems.value.length;
   }
 
-  function getUsersLength(){
+  function getUsersLength() {
     return usersArray.value.length;
   }
 
@@ -401,11 +579,41 @@ function getNewUsersByDate() {
     return result;
   }
 
-  function getUsers(){
+  function getUsers() {
     return usersArray.value;
   }
 
 
+async function getLoansFromApi() {
+    loans.value = [];
+    try {
+        const { data } = await api.get("/loans/");
+        for (let i = 0; i < data.length; i++) {
+            loans.value.push(Loans.fromApi(data[i]));
+        }
+    } catch (error) {
+        console.error("Hiba a hitelek lekérésekor:", error);
+    }
+}
+
+
+
+async function getOffersFromApi() {
+    try {
+        const { data } = await api.get("/offers/");
+        offers.value = data.map(o => Offer.fromApi(o));
+    } catch (error) {
+        console.error("Hiba az ajánlatok lekérésekor:", error);
+    }
+}
+
+function getOffers(){
+  return offers.value
+}
+
+  function getLoans() {
+    return loans.value;
+  }
 
   return {
     getSubmittedItems,
@@ -427,12 +635,29 @@ function getNewUsersByDate() {
     calculateCategoryValues,
     fetchItemByIdAdmin,
     getSelectedItem,
-    getUsersFromArray,
+    getUsersFromApi,
     getUsersLength,
     getUsers,
     calculateNewUsersByDate,
     getNewUsersByDate,
     getUserById,
-    getItemsByUserId
+    getItemsByUserId,
+    getMostActiveUser,
+    getMostActiveUserFromApi,
+    getNewestUser,
+    getNewestAccount,
+    getNewestAccountFromApi,
+    getOldestAccount,
+    getOldestAccountFromApi,
+    getLoans,
+    getLoansFromApi,
+    getMostExpensiveOfferFromApi,
+    getMostExpensiveOffer,
+    getTopExpensiveItemsFromApi,
+    getTopExpensiveItems,
+    getCurrentUserFromApi,
+    getCurrentUser,
+    getOffersFromApi,
+    getOffers,
   };
 });

@@ -16,6 +16,7 @@
     "@tailwindcss/vite": "^4.2.1",
     "axios": "^1.13.6",
     "chart.js": "^4.5.1",
+    "cropperjs": "^1.6.2",
     "jsbarcode": "^3.12.3",
     "pinia": "^3.0.4",
     "primevue": "^4.5.4",

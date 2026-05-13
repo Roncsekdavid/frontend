@@ -76,7 +76,7 @@ async function confirmSave() {
         <div class="flex items-center gap-3 mb-8">
             <div
                 class="w-10 h-10 bg-[#E5B326] rounded-full flex items-center justify-center border-2 border-[#4A2E23] dark:border-[#E5B326] flex-shrink-0">
-                <i class="bi bi-shield-lock-fill text-[#4A2E23]"></i>
+                <i class="bi bi-key text-[#4A2E23]"></i>
             </div>
             <div>
                 <h2 class="text-xl font-black text-[#4A2E23] dark:text-[#FBF5E9] uppercase tracking-tight">Jelszó

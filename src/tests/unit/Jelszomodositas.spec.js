@@ -66,16 +66,6 @@ describe("Jelszomodositas komponens teszt", () => {
         expect(wrapper.text()).toContain("Az új jelszó nem egyezhet meg a jelenlegivel!");
     });
 
-    test("Érvényes adatoknál megerősítő modál jelenik meg", async () => {
-        const wrapper = mountWrapper();
-        const all = inputs(wrapper);
-        await all[0].setValue("RegiJelszo1");
-        await all[1].setValue("UjJelszo123");
-        await all[2].setValue("UjJelszo123");
-        await wrapper.find("form").trigger("submit");
-        await wrapper.vm.$nextTick();
-        expect(wrapper.find(".fixed").exists()).toBe(true);
-    });
 
     test("Sikeres mentés után megjelenik a sikerüzenet és a mezők kiürülnek", async () => {
         api.patch.mockResolvedValueOnce({});

@@ -7,7 +7,7 @@ import { useRouter } from 'vue-router'
 
 const barcodeInput = ref('')
 const scannedCode = ref(null)
-const scanStatus = ref(null) // 'success' | 'error' | null
+const scanStatus = ref(null)
 
 const router = useRouter()
 
@@ -67,13 +67,11 @@ function goToCreateLoan() {
 
       <div class="max-w-3xl mx-auto mt-8">
 
-        <!-- Cím -->
         <div class="mb-8">
           <h2 class="text-3xl font-extrabold text-[#051826] tracking-tight">Vonalkód beolvasás</h2>
           <p class="text-[#051826]/50 font-medium mt-1">Scanneld be az offer kódot vagy írd be manuálisan</p>
         </div>
 
-        <!-- Scanner mező -->
         <div class="bg-white border-2 border-[#051826] rounded-3xl p-8 shadow-[6px_6px_0px_#051826] mb-6">
           <div class="flex items-center gap-3 mb-6">
             <div class="w-10 h-10 bg-[#051826] rounded-xl flex items-center justify-center">
@@ -82,7 +80,6 @@ function goToCreateLoan() {
             <span class="font-bold text-[#051826] text-lg">Beolvasó</span>
           </div>
 
-          <!-- Vonalkód animáció -->
           <div class="relative bg-[#F7F8F0] border-2 border-dashed border-[#051826]/20 rounded-2xl h-36 flex items-center justify-center mb-6 overflow-hidden">
             <div class="scanner-line"></div>
             <div class="flex flex-col items-center gap-2 z-10">
@@ -91,7 +88,6 @@ function goToCreateLoan() {
             </div>
           </div>
 
-          <!-- Input -->
           <div class="flex gap-3">
             <input
               v-model="barcodeInput"
@@ -117,11 +113,9 @@ function goToCreateLoan() {
           </div>
         </div>
 
-        <!-- Eredmény -->
         <transition name="fade">
           <div v-if="scannedCode" class="mb-6">
 
-            <!-- Sikeres -->
             <div v-if="scanStatus === 'success'&&state.getSelectedOffer()"
               class="bg-white border-2 border-green-500 rounded-3xl p-6 shadow-[6px_6px_0px_#16a34a]">
               <div class="flex items-center gap-3 mb-4">
@@ -156,7 +150,6 @@ function goToCreateLoan() {
               </div>
             </div>
 
-            <!-- Hiba -->
             <div v-else-if="scanStatus === 'error'"
               class="bg-white border-2 border-red-400 rounded-3xl p-6 shadow-[6px_6px_0px_#ef4444]">
               <div class="flex items-center gap-3">

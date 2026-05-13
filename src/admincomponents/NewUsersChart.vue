@@ -1,6 +1,6 @@
 <script setup>
 import { Chart } from 'chart.js/auto';
-import { onMounted, ref, nextTick } from 'vue';
+import { onMounted, ref, nextTick, watch } from 'vue';
 import { adminState } from '../adminstate/state';
 
 const chartRef = ref(null);
@@ -73,14 +73,25 @@ async function initChart() {
   });
 }
 
+watch(
+  () => adminStore.getUsers().length,
+  async (newLen) => {
+    if (newLen === 0) return;
+    adminStore.calculateNewUsersByDate();
+    await nextTick();
+    initChart();
+  }
+);
+
+
 onMounted(async () => {
-  await adminStore.getUsersFromArray();
-  adminStore.calculateNewUsersByDate();
-
-  await nextTick();
-
-  initChart();
+  if (adminStore.getUsers().length > 0) {
+    adminStore.calculateNewUsersByDate();
+    await nextTick();
+    initChart();
+  }
 });
+
 </script>
 
 <template>

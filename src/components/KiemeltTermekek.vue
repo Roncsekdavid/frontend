@@ -1,39 +1,45 @@
 <script setup>
-import { ref, computed, onMounted } from 'vue'
+import {  ref, shallowRef, computed, watch } from 'vue'
 import ItemCard from './ItemCard.vue'
 import api from '../services/api'
 import { useFavoritesStore } from '../state/stateFavorites'
 import { useAuthStore } from '../state/stateAuth'
+import Items from '../classes/Items'
 
 const favoritesStore = useFavoritesStore()
 const authStore = useAuthStore()
 
-const items = ref([])
+const items = shallowRef([])
 const loadingItems = ref(true)
 const itemsError = ref(false)
 
 const filteredItems = computed(() => {
   if (!favoritesStore.hasFavorites) return items.value
   return items.value.filter(item =>
-    favoritesStore.favoriteCategories.includes(item.category)
+    favoritesStore.favoriteCategories.includes(item.getCategory())
   )
 })
 
-onMounted(async () => {
-  if (!authStore.isLoggedIn) {
-    loadingItems.value = false
-    return
-  }
-  try {
-    const { data } = await api.get('/items/for-sale')
-    items.value = data
-  } catch (err) {
-    console.error('[KiemeltTermekek] Betöltése sikertelen:', err)
-    itemsError.value = true
-  } finally {
-    loadingItems.value = false
-  }
-})
+watch(
+  () => authStore.isLoggedIn,
+  async (loggedIn) => {
+    if (!loggedIn) {
+      loadingItems.value = false
+      return
+    }
+    try {
+      await authStore.fetchUser()
+      const { data } = await api.get('/items/for-sale')
+      items.value = data.map(i => Items.fromApi(i))
+    } catch (err) {
+      console.error('[KiemeltTermekek] Betöltése sikertelen:', err)
+      itemsError.value = true
+    } finally {
+      loadingItems.value = false
+    }
+  },
+  { immediate: true }
+)
 </script>
 
 <template>
@@ -43,7 +49,8 @@ onMounted(async () => {
         <h3 class="text-[42px] font-extrabold text-[#4A2E23] dark:text-[#E5B326] leading-tight max-md:text-[32px]">
           {{ (authStore.isLoggedIn && favoritesStore.hasFavorites) ? 'Az Ön érdeklődési köre' : 'Kiemelt termékeink' }}
         </h3>
-        <p v-if="authStore.isLoggedIn && favoritesStore.hasFavorites" class="text-[#4A2E23]/60 dark:text-[#D4C7B0] font-bold text-sm mt-2">
+        <p v-if="authStore.isLoggedIn && favoritesStore.hasFavorites"
+          class="text-[#4A2E23]/60 dark:text-[#D4C7B0] font-bold text-sm mt-2">
           A kedvenc kategóriái alapján szűrve
         </p>
         <div class="w-24 h-1.5 bg-[#E5B326] mx-auto mt-4 rounded-full"></div>
@@ -65,14 +72,17 @@ onMounted(async () => {
         <p class="text-[#4A2E23]/60 dark:text-[#D4C7B0] font-bold">Nem sikerült betölteni a termékeket.</p>
       </div>
 
-      <div v-else-if="!authStore.isLoggedIn" class="flex flex-col items-center text-center py-16 max-w-sm mx-auto gap-5">
-        <div class="w-20 h-20 bg-white dark:bg-[#1A1614] border-2 border-[#4A2E23] dark:border-[#E5B326] rounded-3xl flex items-center justify-center shadow-[6px_6px_0px_#4A2E23] dark:shadow-[6px_6px_0px_#E5B326]">
+      <div v-else-if="!authStore.isLoggedIn"
+        class="flex flex-col items-center text-center py-16 max-w-sm mx-auto gap-5">
+        <div
+          class="w-20 h-20 bg-white dark:bg-[#1A1614] border-2 border-[#4A2E23] dark:border-[#E5B326] rounded-3xl flex items-center justify-center shadow-[6px_6px_0px_#4A2E23] dark:shadow-[6px_6px_0px_#E5B326]">
           <i class="bi bi-person-lock text-[#E5B326] text-4xl"></i>
         </div>
         <div>
           <h4 class="text-xl font-black text-[#4A2E23] dark:text-[#FBF5E9] mb-2">Személyre szabott ajánlatok</h4>
           <p class="text-[#4A2E23]/60 dark:text-[#D4C7B0] font-medium text-sm leading-relaxed">
-            Jelentkezzen be, majd válassza ki kedvenc kategóriáit a profilban — Mi az alapján jelenítjük meg az Önnek releváns termékekeinket!
+            Jelentkezzen be, majd válassza ki kedvenc kategóriáit a profilban — Mi az alapján jelenítjük meg az Önnek
+            releváns termékekeinket!
           </p>
         </div>
         <router-link to="/login"
@@ -81,14 +91,17 @@ onMounted(async () => {
         </router-link>
       </div>
 
-      <div v-else-if="!favoritesStore.hasFavorites" class="flex flex-col items-center text-center py-16 max-w-sm mx-auto gap-5">
-        <div class="w-20 h-20 bg-white dark:bg-[#1A1614] border-2 border-[#4A2E23] dark:border-[#E5B326] rounded-3xl flex items-center justify-center shadow-[6px_6px_0px_#4A2E23] dark:shadow-[6px_6px_0px_#E5B326]">
+      <div v-else-if="!favoritesStore.hasFavorites"
+        class="flex flex-col items-center text-center py-16 max-w-sm mx-auto gap-5">
+        <div
+          class="w-20 h-20 bg-white dark:bg-[#1A1614] border-2 border-[#4A2E23] dark:border-[#E5B326] rounded-3xl flex items-center justify-center shadow-[6px_6px_0px_#4A2E23] dark:shadow-[6px_6px_0px_#E5B326]">
           <i class="bi bi-stars text-[#E5B326] text-4xl"></i>
         </div>
         <div>
           <h4 class="text-xl font-black text-[#4A2E23] dark:text-[#FBF5E9] mb-2">Még nincsenek kedvenc kategóriái</h4>
           <p class="text-[#4A2E23]/60 dark:text-[#D4C7B0] font-medium text-sm leading-relaxed">
-            Látogasson el a profiljába, és jelöljön be néhány kategóriát — Mi az alapján szűrjük Önnek a kiemelt termékekeinket.
+            Látogasson el a profiljába, és jelöljön be néhány kategóriát — Mi az alapján szűrjük Önnek a kiemelt
+            termékekeinket.
           </p>
         </div>
         <router-link to="/profil"
@@ -99,11 +112,12 @@ onMounted(async () => {
 
       <div v-else-if="filteredItems.length === 0" class="text-center py-16">
         <i class="bi bi-box-seam text-5xl text-[#4A2E23]/20 dark:text-[#E5B326]/20 mb-4 block"></i>
-        <p class="text-[#4A2E23]/50 dark:text-[#D4C7B0] font-bold">A kedvenc kategóriáiban jelenleg nincs eladó termék.</p>
+        <p class="text-[#4A2E23]/50 dark:text-[#D4C7B0] font-bold">A kedvenc kategóriáiban jelenleg nincs eladó termék.
+        </p>
       </div>
 
       <div v-else class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-5">
-        <ItemCard v-for="item in filteredItems" :key="item.id" :item="item" />
+        <ItemCard v-for="item in filteredItems" :key="item.getId()" :item="item" />
       </div>
     </div>
   </section>

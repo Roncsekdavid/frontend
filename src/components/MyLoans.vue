@@ -22,10 +22,19 @@ async function fetchLoans() {
 
 function statusClass(status) {
   if (status === 'ACTIVE') return 'bg-green-100 text-green-700'
-  if (status === 'OVERDUE') return 'bg-red-100 text-red-700'
+  if (status === 'EXTENDED') return 'bg-blue-100 text-blue-700'
   if (status === 'CLOSED') return 'bg-gray-100 text-gray-700'
-  if (status === 'EXTENDED') return 'bg-yellow-100 text-yellow-700'
+  if (status === 'DEFAULTED') return 'bg-red-100 text-red-700'
+  if (status === 'OVERDUE') return 'bg-yellow-100 text-yellow-700'
   return 'bg-[#E5B326] text-[#4A2E23]'
+}
+function statusLabel(status) {
+  if (status === 'ACTIVE') return 'Aktív'
+  if (status === 'EXTENDED') return 'Meghosszabbított'
+  if (status === 'CLOSED') return 'Lezárt'
+  if (status === 'DEFAULTED') return 'Meghiúsult'
+  if (status === 'OVERDUE') return 'Lejárt'
+  return status
 }
 
 onMounted(fetchLoans)
@@ -66,14 +75,14 @@ onMounted(fetchLoans)
             class="self-start font-black text-xs px-3 py-1 rounded-full"
             :class="statusClass(loan.status)"
           >
-            {{ loan.status }}
+            {{ statusLabel(loan.status) }}
           </span>
         </div>
 
         <div class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-3">
           <div class="bg-white dark:bg-[#26211E] rounded-2xl p-4 border-2 border-[#4A2E23]/10 dark:border-[#E5B326]/10">
             <p class="text-xs font-black text-[#4A2E23]/40 dark:text-[#D4C7B0]/40 uppercase">Kölcsönösszeg</p>
-            <p class="font-black text-[#4A2E23] dark:text-[#FBF5E9]">{{ loan.principal_amount }} Ft</p>
+            <p class="font-black text-[#4A2E23] dark:text-[#FBF5E9]">{{ loan.principal_amount.toLocaleString('hu-HU') }} Ft</p>
           </div>
 
           <div class="bg-white dark:bg-[#26211E] rounded-2xl p-4 border-2 border-[#4A2E23]/10 dark:border-[#E5B326]/10">
@@ -92,6 +101,27 @@ onMounted(fetchLoans)
             <p class="text-xs font-black text-[#4A2E23]/40 dark:text-[#D4C7B0]/40 uppercase">Lejárat</p>
             <p class="font-black text-[#4A2E23] dark:text-[#FBF5E9]">
               {{ new Date(loan.due_date).toLocaleDateString('hu-HU') }}
+            </p>
+          </div>
+        </div>
+
+        <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 mt-3">
+          <div class="bg-white dark:bg-[#26211E] rounded-2xl p-4 border-2 border-[#4A2E23]/10 dark:border-[#E5B326]/10">
+            <p class="text-xs font-black text-[#4A2E23]/40 dark:text-[#D4C7B0]/40 uppercase">Kamatláb</p>
+            <p class="font-black text-[#4A2E23] dark:text-[#FBF5E9]">{{ loan.interest_rate }} %</p>
+          </div>
+
+          <div class="bg-white dark:bg-[#26211E] rounded-2xl p-4 border-2 border-[#4A2E23]/10 dark:border-[#E5B326]/10">
+            <p class="text-xs font-black text-[#4A2E23]/40 dark:text-[#D4C7B0]/40 uppercase">Havi törlesztő</p>
+            <p class="font-black text-[#E5B326]">
+              {{ Math.round(loan.principal_amount * (1 + loan.interest_rate / 100) / loan.duration_months).toLocaleString('hu-HU') }} Ft
+            </p>
+          </div>
+
+          <div class="bg-white dark:bg-[#26211E] rounded-2xl p-4 border-2 border-[#4A2E23]/10 dark:border-[#E5B326]/10">
+            <p class="text-xs font-black text-[#4A2E23]/40 dark:text-[#D4C7B0]/40 uppercase">Visszafizetendő végösszeg</p>
+            <p class="font-black text-[#4A2E23] dark:text-[#FBF5E9]">
+              {{ Math.round(loan.principal_amount * (1 + loan.interest_rate / 100)).toLocaleString('hu-HU') }} Ft
             </p>
           </div>
         </div>

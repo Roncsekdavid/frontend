@@ -1,16 +1,16 @@
 import { createRouter, createWebHistory } from "vue-router";
-import Főoldal from "../views/Főoldal.vue";
-import Rólunk from "../views/Rólunk.vue";
-import TárgyFelvétele from "../views/TárgyFelvétele.vue";
+import Főoldal from "../views/Fooldal.vue";
+import Rólunk from "../views/Rolunk.vue";
+import TárgyFelvétele from "../views/TargyFelvetele.vue";
 import Regisztráció from "../views/Regisztráció.vue";
 import Bejelentkezés from "../views/Bejelentkezés.vue";
 import Profil from "../views/Profil.vue";
-import GyakoriKérdés from "../views/GyakoriKérdés.vue";
-import Panaszkűldés from "../views/Panaszkűldés.vue";
+import GyakoriKérdés from "../views/GyakoriKerdes.vue";
+import Panaszkűldés from "../views/Panaszkuldes.vue";
 import api from '../services/api'
 import DashboardView from "../adminview/DashboardView.vue";
 import ItemsView from "../adminview/ItemsView.vue";
-import Működésünk from "../views/Működésünk.vue";
+import Működésünk from "../views/Mukodesunk.vue";
 import UserView from "../adminview/UserView.vue";
 import NewItems from "../adminview/NewItems.vue";
 import LoansView from "../adminview/LoansView.vue";
@@ -19,7 +19,10 @@ import IncomingOffers from "../components/IncomingOffers.vue";
 import MyLoans from "../components/MyLoans.vue";
 import CreateLoanView from "../adminview/CreateLoanView.vue";
 import ItemView from "../adminview/ItemView.vue";
-
+import UgyfelView from "../adminview/UgyfelView.vue"
+import LoanManageView from "../adminview/LoanManageView.vue";
+import SalesView from "../admincomponents/SalesView.vue";
+import AdminNewsView from "../adminview/AdminNewsView.vue";
 
 const routes = [
   {
@@ -118,7 +121,7 @@ const routes = [
   {
     path: '/ugyfelek/:id',
     name: 'ugyfel',
-    component: () => import('../adminview/UgyfelView.vue'),
+    component: UgyfelView,
     meta: { requiresAuth: true }
   },
   {
@@ -150,7 +153,26 @@ const routes = [
     name: "ItemView",
     component: ItemView,
     meta: { requiresAdmin: true }
-  }
+  },
+  { 
+    path: '/admin/loans/:id', 
+    name: "LoanManageView",
+    component: LoanManageView,
+    meta: { requiresAdmin: true }
+    
+  },
+  {
+  path: '/admin/sales',
+  name: 'AdminSales',
+  component: SalesView,
+  meta: {requiresAdmin: true}
+},
+{
+  path: '/admin/news',
+  name: 'AdminNews',
+  component: AdminNewsView,
+  meta: { requiresAdmin: true }
+}
 ];
 
 const router = createRouter({
