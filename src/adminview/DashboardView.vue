@@ -3,7 +3,7 @@ import AdminMenu from '../admincomponents/AdminMenu.vue';
 import Card from '../admincomponents/Card.vue';
 import User from '../admincomponents/User.vue';
 import DoughChart from '../admincomponents/DoughChart.vue';
-import LineChart from '../admincomponents/lineChart.vue';
+import LineChart from '../admincomponents/LineChart.vue';
 import AdminHeader from '../admincomponents/AdminHeader.vue';
 import BarChart from '../admincomponents/BarChart.vue';
 import ItemCard from '../admincomponents/ItemCard.vue';
