@@ -24,11 +24,48 @@ const creating = ref(false)
 const loanErrorMessage = ref('')
 const loanSuccessMessage = ref('')
 
+const selectedImageIndex = ref(0)
+
+const selectedOffer = computed(() => {
+    return state.getSelectedOffer()
+})
+
+const selectedItem = computed(() => {
+    return selectedOffer.value?.getItem?.() || null
+})
+
+const itemImages = computed(() => {
+    return selectedItem.value?.getItemImages?.() || []
+})
+
+const selectedImage = computed(() => {
+    if (!itemImages.value.length) return null
+    return itemImages.value[selectedImageIndex.value]
+})
+
 const loanEndDate = computed(() => {
     const date = new Date(loanStartDate.value)
     date.setMonth(date.getMonth() + Number(durationMonths.value))
     return date.toISOString().slice(0, 10)
 })
+
+function selectImage(index) {
+    selectedImageIndex.value = index
+}
+
+function nextImage() {
+    if (!itemImages.value.length) return
+    selectedImageIndex.value = (selectedImageIndex.value + 1) % itemImages.value.length
+}
+
+function prevImage() {
+    if (!itemImages.value.length) return
+
+    selectedImageIndex.value =
+        selectedImageIndex.value === 0
+            ? itemImages.value.length - 1
+            : selectedImageIndex.value - 1
+}
 
 async function createLoan() {
     if (creating.value) return
@@ -71,7 +108,6 @@ function goBack() {
     router.back()
 }
 
-
 onMounted(async () => {
     try {
         const id = route.params.id
@@ -86,6 +122,7 @@ onMounted(async () => {
 
         loanAmount.value = offer.getLoanAmount()
         interestRate.value = offer.getInterestRate()
+        selectedImageIndex.value = 0
     } catch (error) {
         console.error(error)
         loadError.value = true
@@ -113,12 +150,14 @@ onMounted(async () => {
                     </p>
                 </div>
 
-                <div v-if="loading"
-                    class="bg-white border-2 border-[#051826] rounded-3xl p-6 shadow-[6px_6px_0px_#051826]">
+                <div
+                    v-if="loading"
+                    class="bg-white border-2 border-[#051826] rounded-3xl p-6 shadow-[6px_6px_0px_#051826]"
+                >
                     <p class="font-bold text-[#051826]">Ajánlat betöltése...</p>
                 </div>
 
-                <div v-else-if="state.getSelectedOffer()" class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                <div v-else-if="selectedOffer" class="grid grid-cols-1 lg:grid-cols-2 gap-6">
                     <div class="bg-white border-2 border-[#051826] rounded-3xl p-6 shadow-[6px_6px_0px_#051826]">
 
                         <div class="flex items-center gap-3 mb-5">
@@ -129,21 +168,64 @@ onMounted(async () => {
                         </div>
 
                         <div class="mb-5">
-                            <div v-if="state.getSelectedOffer().getItem().getItemImages()?.length">
+                            <div v-if="itemImages.length">
+                                <div class="relative">
+                                    <img
+                                        :src="selectedImage?.url || selectedItem.getPrimaryImage()"
+                                        class="w-full h-56 object-cover rounded-2xl border-2 border-[#051826] mb-3"
+                                        alt="Tárgy képe"
+                                    />
 
-                                <img :src="state.getSelectedOffer().getItem().getPrimaryImage()"
-                                    class="w-full h-56 object-cover rounded-2xl border-2 border-[#051826] mb-3" />
+                                    <button
+                                        v-if="itemImages.length > 1"
+                                        type="button"
+                                        @click="prevImage"
+                                        class="absolute left-3 top-1/2 -translate-y-1/2 w-10 h-10 rounded-full bg-white/90 border-2 border-[#051826] text-[#051826] font-black shadow-[3px_3px_0px_#051826] hover:bg-[#E5B326] transition-all"
+                                    >
+                                        <i class="bi bi-chevron-left"></i>
+                                    </button>
 
-                                <div class="flex gap-2 overflow-x-auto">
-                                    <img v-for="img in state.getSelectedOffer().getItem().getItemImages()" :key="img.id"
-                                        :src="img.url"
-                                        class="w-16 h-16 object-cover rounded-xl border-2 border-[#051826]/30" />
+                                    <button
+                                        v-if="itemImages.length > 1"
+                                        type="button"
+                                        @click="nextImage"
+                                        class="absolute right-3 top-1/2 -translate-y-1/2 w-10 h-10 rounded-full bg-white/90 border-2 border-[#051826] text-[#051826] font-black shadow-[3px_3px_0px_#051826] hover:bg-[#E5B326] transition-all"
+                                    >
+                                        <i class="bi bi-chevron-right"></i>
+                                    </button>
+
+                                    <div
+                                        v-if="itemImages.length > 1"
+                                        class="absolute bottom-5 left-1/2 -translate-x-1/2 bg-[#051826]/80 text-white text-xs font-black px-3 py-1 rounded-full"
+                                    >
+                                        {{ selectedImageIndex + 1 }} / {{ itemImages.length }}
+                                    </div>
                                 </div>
 
+                                <div class="flex gap-2 overflow-x-auto pb-1">
+                                    <button
+                                        v-for="(img, index) in itemImages"
+                                        :key="img.id || index"
+                                        type="button"
+                                        @click="selectImage(index)"
+                                        class="rounded-xl border-2 transition-all flex-shrink-0"
+                                        :class="selectedImageIndex === index
+                                            ? 'border-[#E5B326] shadow-[3px_3px_0px_#051826]'
+                                            : 'border-[#051826]/30 opacity-70 hover:opacity-100'"
+                                    >
+                                        <img
+                                            :src="img.url"
+                                            class="w-16 h-16 object-cover rounded-[10px]"
+                                            alt="Tárgy kis képe"
+                                        />
+                                    </button>
+                                </div>
                             </div>
 
-                            <div v-else
-                                class="h-56 flex items-center justify-center bg-[#F7F8F0] rounded-2xl border-2 border-dashed border-[#051826]/30">
+                            <div
+                                v-else
+                                class="h-56 flex items-center justify-center bg-[#F7F8F0] rounded-2xl border-2 border-dashed border-[#051826]/30"
+                            >
                                 <span class="text-[#051826]/40 font-bold">Nincs kép</span>
                             </div>
                         </div>
@@ -152,14 +234,14 @@ onMounted(async () => {
                             <div class="bg-[#F7F8F0] rounded-xl p-4">
                                 <p class="text-xs font-bold text-[#051826]/40 uppercase mb-1">Tárgy neve</p>
                                 <p class="font-bold text-[#051826]">
-                                    {{ state.getSelectedOffer().getItem().getName() }}
+                                    {{ selectedItem.getName() }}
                                 </p>
                             </div>
 
                             <div class="bg-[#F7F8F0] rounded-xl p-4">
                                 <p class="text-xs font-bold text-[#051826]/40 uppercase mb-1">Offer kód</p>
                                 <p class="font-mono font-bold text-[#051826]">
-                                    {{ state.getSelectedOffer().getOfferCode() }}
+                                    {{ selectedOffer.getOfferCode() }}
                                 </p>
                             </div>
 
@@ -167,14 +249,14 @@ onMounted(async () => {
                                 <div class="bg-[#F7F8F0] rounded-xl p-4">
                                     <p class="text-xs font-bold text-[#051826]/40 uppercase mb-1">Összeg</p>
                                     <p class="font-bold text-[#051826]">
-                                        {{ state.getSelectedOffer().getLoanAmount() }} Ft
+                                        {{ selectedOffer.getLoanAmount() }} Ft
                                     </p>
                                 </div>
 
                                 <div class="bg-[#F7F8F0] rounded-xl p-4">
                                     <p class="text-xs font-bold text-[#051826]/40 uppercase mb-1">Kamat</p>
                                     <p class="font-bold text-[#051826]">
-                                        {{ state.getSelectedOffer().getInterestRate() }}%
+                                        {{ selectedOffer.getInterestRate() }}%
                                     </p>
                                 </div>
                             </div>
@@ -182,8 +264,9 @@ onMounted(async () => {
                             <div class="bg-[#F7F8F0] rounded-xl p-4">
                                 <p class="text-xs font-bold text-[#051826]/40 uppercase mb-1">Státusz</p>
                                 <span
-                                    class="inline-block bg-yellow-100 text-yellow-800 font-bold text-xs px-3 py-1 rounded-full">
-                                    {{ state.getSelectedOffer().getStatus() }}
+                                    class="inline-block bg-yellow-100 text-yellow-800 font-bold text-xs px-3 py-1 rounded-full"
+                                >
+                                    {{ selectedOffer.getStatus() }}
                                 </span>
                             </div>
                         </div>
@@ -198,25 +281,35 @@ onMounted(async () => {
                         </div>
 
                         <div class="space-y-4">
-                            <div v-if="loanErrorMessage"
-                                class="bg-red-50 border-2 border-red-400 rounded-xl p-4 text-red-700 font-bold">
+                            <div
+                                v-if="loanErrorMessage"
+                                class="bg-red-50 border-2 border-red-400 rounded-xl p-4 text-red-700 font-bold"
+                            >
                                 {{ loanErrorMessage }}
                             </div>
 
-                            <div v-if="loanSuccessMessage"
-                                class="bg-green-50 border-2 border-green-500 rounded-xl p-4 text-green-700 font-bold">
+                            <div
+                                v-if="loanSuccessMessage"
+                                class="bg-green-50 border-2 border-green-500 rounded-xl p-4 text-green-700 font-bold"
+                            >
                                 {{ loanSuccessMessage }}
                             </div>
+
                             <div>
                                 <label class="text-sm font-bold text-[#051826]">Kezdés dátuma</label>
-                                <input v-model="loanStartDate" type="date"
-                                    class="w-full mt-1 border-2 border-[#051826] rounded-xl px-4 py-3 font-bold text-[#051826]" />
+                                <input
+                                    v-model="loanStartDate"
+                                    type="date"
+                                    class="w-full mt-1 border-2 border-[#051826] rounded-xl px-4 py-3 font-bold text-[#051826]"
+                                />
                             </div>
 
                             <div>
                                 <label class="text-sm font-bold text-[#051826]">Futamidő</label>
-                                <select v-model="durationMonths"
-                                    class="w-full mt-1 border-2 border-[#051826] rounded-xl px-4 py-3 font-bold text-[#051826] bg-white">
+                                <select
+                                    v-model="durationMonths"
+                                    class="w-full mt-1 border-2 border-[#051826] rounded-xl px-4 py-3 font-bold text-[#051826] bg-white"
+                                >
                                     <option :value="1">1 hónap</option>
                                     <option :value="2">2 hónap</option>
                                     <option :value="3">3 hónap</option>
@@ -227,37 +320,58 @@ onMounted(async () => {
 
                             <div>
                                 <label class="text-sm font-bold text-[#051826]">Lejárat dátuma</label>
-                                <input :value="loanEndDate" type="date" disabled
-                                    class="w-full mt-1 border-2 border-[#051826]/30 rounded-xl px-4 py-3 font-bold text-[#051826]/60 bg-[#F7F8F0]" />
+                                <input
+                                    :value="loanEndDate"
+                                    type="date"
+                                    disabled
+                                    class="w-full mt-1 border-2 border-[#051826]/30 rounded-xl px-4 py-3 font-bold text-[#051826]/60 bg-[#F7F8F0]"
+                                />
                             </div>
 
                             <div>
                                 <label class="text-sm font-bold text-[#051826]">Kölcsönösszeg</label>
-                                <input v-model="loanAmount" type="number" min="0"
-                                    class="w-full mt-1 border-2 border-[#051826] rounded-xl px-4 py-3 font-bold text-[#051826]" />
+                                <input
+                                    v-model="loanAmount"
+                                    type="number"
+                                    min="0"
+                                    class="w-full mt-1 border-2 border-[#051826] rounded-xl px-4 py-3 font-bold text-[#051826]"
+                                />
                             </div>
 
                             <div>
                                 <label class="text-sm font-bold text-[#051826]">Kamat (%)</label>
-                                <input v-model="interestRate" type="number" min="0" step="0.1"
-                                    class="w-full mt-1 border-2 border-[#051826] rounded-xl px-4 py-3 font-bold text-[#051826]" />
+                                <input
+                                    v-model="interestRate"
+                                    type="number"
+                                    min="0"
+                                    step="0.1"
+                                    class="w-full mt-1 border-2 border-[#051826] rounded-xl px-4 py-3 font-bold text-[#051826]"
+                                />
                             </div>
 
                             <div>
                                 <label class="text-sm font-bold text-[#051826]">Megjegyzés</label>
-                                <textarea v-model="note" rows="4"
+                                <textarea
+                                    v-model="note"
+                                    rows="4"
                                     placeholder="Pl. helyszíni megállapodás alapján módosított összeg/kamat..."
-                                    class="w-full mt-1 border-2 border-[#051826] rounded-xl px-4 py-3"></textarea>
+                                    class="w-full mt-1 border-2 border-[#051826] rounded-xl px-4 py-3"
+                                ></textarea>
                             </div>
 
                             <div class="flex gap-3 pt-3">
-                                <button @click="goBack"
-                                    class="border-2 border-[#051826] text-[#051826] hover:bg-[#051826] hover:text-white font-bold px-6 py-3 rounded-xl">
+                                <button
+                                    @click="goBack"
+                                    class="border-2 border-[#051826] text-[#051826] hover:bg-[#051826] hover:text-white font-bold px-6 py-3 rounded-xl"
+                                >
                                     Vissza
                                 </button>
 
-                                <button @click="createLoan" :disabled="creating"
-                                    class="bg-[#051826] disabled:opacity-50 disabled:cursor-not-allowed text-white font-bold px-6 py-3 rounded-xl flex-1">
+                                <button
+                                    @click="createLoan"
+                                    :disabled="creating"
+                                    class="bg-[#051826] disabled:opacity-50 disabled:cursor-not-allowed text-white font-bold px-6 py-3 rounded-xl flex-1"
+                                >
                                     {{ creating ? 'Létrehozás...' : 'Kölcsön létrehozása' }}
                                 </button>
                             </div>
@@ -266,8 +380,10 @@ onMounted(async () => {
 
                 </div>
 
-
-                <div v-else class="bg-white border-2 border-red-400 rounded-3xl p-6 shadow-[6px_6px_0px_#ef4444]">
+                <div
+                    v-else
+                    class="bg-white border-2 border-red-400 rounded-3xl p-6 shadow-[6px_6px_0px_#ef4444]"
+                >
                     <p class="font-extrabold text-red-700">
                         Nincs kiválasztott ajánlat. Először olvass be egy offer kódot.
                     </p>
@@ -277,4 +393,5 @@ onMounted(async () => {
         </div>
     </div>
 </template>
+
 <style scoped></style>
