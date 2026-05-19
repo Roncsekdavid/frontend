@@ -47,38 +47,38 @@ const routes = [
     meta: { requiresAuth: true }
   },
   {
-    path: "/profil",
-    name: "Profil",
-    component: Profil,
-    meta: { requiresAuth: true },
-    children: [
-      {
-        path: "",
-        name: "ProfilAdatok",
-        component: () => import("../components/ProfilBeallitasok.vue")
-      },
-      {
-        path: "jelszo",
-        name: "JelszoModositas",
-        component: () => import("../components/Jelszomodositas.vue")
-      },
-      {
-        path: "targyaim",
-        name: "ProfilTargyaim",
-        component: () => import("../components/FelvettTargyak.vue")
-      },
-      {
-        path: 'ajanlatok',
-        name: 'Ajánlatok',
-        component: () => IncomingOffers,
-      },
-      {
-        path: 'hiteleim',
-        name: 'Hiteleim',
-        component: () => MyLoans,
-      }
-    ]
-  },
+  path: "/profil",
+  name: "Profil",
+  component: Profil,
+  meta: { requiresAuth: true },
+  children: [
+    {
+      path: "",
+      name: "ProfilAdatok",
+      component: () => import("../components/ProfilBeallitasok.vue")
+    },
+    {
+      path: "jelszo",
+      name: "JelszoModositas",
+      component: () => import("../components/Jelszomodositas.vue")
+    },
+    {
+      path: "targyaim",
+      name: "ProfilTargyaim",
+      component: () => import("../components/FelvettTargyak.vue")
+    },
+    {
+      path: "ajanlatok",
+      name: "Ajánlatok",
+      component: IncomingOffers
+    },
+    {
+      path: "hiteleim",
+      name: "Hiteleim",
+      component: MyLoans
+    }
+  ]
+},
   {
     path: "/gyik",
     name: "Gyakori Kérdések",
