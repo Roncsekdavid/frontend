@@ -2,7 +2,7 @@
 import { computed } from 'vue';
 
 const props = defineProps({
-    loading: { type: Boolean, default: false }, // Új: betöltési állapot
+    loading: { type: Boolean, default: false },
     itemTitle: String,
     itemImage: String,
     itemName: String,
@@ -19,6 +19,16 @@ const loadImage = computed(() => {
     return props.itemImage.startsWith('http') 
         ? props.itemImage 
         : new URL(props.itemImage, import.meta.url).href
+})
+
+const shortDesc = computed(() => {
+    if (!props.itemDesc) return ''
+
+    const maxLength = 120
+
+    return props.itemDesc.length > maxLength
+        ? props.itemDesc.slice(0, maxLength) + '...'
+        : props.itemDesc
 })
 </script>
 
@@ -62,10 +72,12 @@ const loadImage = computed(() => {
                 </p>
 
                 <p class="text-sm text-gray-600 mt-1 border-b border-gray-200 pb-3 leading-relaxed">
-                    <span v-if="itemDesc">{{ itemDesc }}</span>
+                    <span v-if="itemDesc">{{ shortDesc }}</span>
                     <span v-else class="italic text-gray-400">Nincs leírás megadva</span>
                     <br />
-                    <span class="text-xs font-mono text-blue-600/70"><i class="bi bi-calendar3 mr-1"></i>{{ itemDate }}</span>
+                    <span class="text-xs font-mono text-blue-600/70">
+                        <i class="bi bi-calendar3 mr-1"></i>{{ itemDate }}
+                    </span>
                 </p>
 
                 <p class="text-2xl font-bold text-blue-900 mt-4 flex items-center gap-1">
@@ -78,7 +90,6 @@ const loadImage = computed(() => {
 </template>
 
 <style scoped>
-
 .animate-pulse {
     animation: pulse 1.8s cubic-bezier(0.4, 0, 0.6, 1) infinite;
 }
