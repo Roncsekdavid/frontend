@@ -24,7 +24,7 @@ const loadImage = computed(() => {
 const shortDesc = computed(() => {
     if (!props.itemDesc) return ''
 
-    const maxLength = 120
+    const maxLength = 115
 
     return props.itemDesc.length > maxLength
         ? props.itemDesc.slice(0, maxLength) + '...'
@@ -33,9 +33,10 @@ const shortDesc = computed(() => {
 </script>
 
 <template>
-    <div class="bg-white rounded-3xl transition-all duration-200 p-6 border-2 border-[#051826] shadow-[6px_6px_0px_#051826]"
-         :class="{ 'animate-pulse cursor-wait': loading, 'cursor-pointer hover:scale-[1.01]': !loading }">
-        
+    <div
+        class="bg-white rounded-3xl transition-all duration-200 p-6 border-2 border-[#051826] shadow-[6px_6px_0px_#051826] h-[520px] flex flex-col"
+        :class="{ 'animate-pulse cursor-wait': loading, 'cursor-pointer hover:scale-[1.01]': !loading }"
+    >
         <div v-if="loading">
             <div class="h-7 bg-gray-200 rounded-md w-3/4 mb-3"></div>
             <div class="w-full h-48 bg-gray-200 rounded-xl mb-4"></div>
@@ -48,8 +49,8 @@ const shortDesc = computed(() => {
         </div>
 
         <template v-else>
-            <component :is="to ? 'router-link' : 'div'" :to="to" class="block">
-                <h2 class="text-xl font-semibold text-gray-900 mb-3 flex items-center gap-2">
+            <component :is="to ? 'router-link' : 'div'" :to="to" class="block h-full flex flex-col">
+                <h2 class="text-xl font-semibold text-gray-900 mb-3 flex items-center gap-2 h-[56px] line-clamp-2">
                     <i v-if="!itemTitle" class="bi bi-tag text-blue-500"></i>
                     {{ itemTitle || 'Nincs megnevezés' }}
                 </h2>
@@ -67,11 +68,11 @@ const shortDesc = computed(() => {
                     </div>
                 </div>
 
-                <p class="text-lg font-semibold text-gray-900 mt-4">
+                <p class="text-lg font-semibold text-gray-900 mt-4 h-[32px] overflow-hidden whitespace-nowrap text-ellipsis">
                     {{ itemName }}
                 </p>
 
-                <p class="text-sm text-gray-600 mt-1 border-b border-gray-200 pb-3 leading-relaxed">
+                <p class="text-sm text-gray-600 mt-1 border-b border-gray-200 pb-3 leading-relaxed h-[86px] overflow-hidden">
                     <span v-if="itemDesc">{{ shortDesc }}</span>
                     <span v-else class="italic text-gray-400">Nincs leírás megadva</span>
                     <br />
@@ -80,7 +81,7 @@ const shortDesc = computed(() => {
                     </span>
                 </p>
 
-                <p class="text-2xl font-bold text-blue-900 mt-4 flex items-center gap-1">
+                <p class="text-2xl font-bold text-blue-900 mt-auto flex items-center gap-1">
                     <i class="bi bi-currency-exchange text-xl text-blue-500"></i>
                     {{ itemPrice?.toLocaleString('hu-HU') }} Ft.
                 </p>
