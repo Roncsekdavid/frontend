@@ -101,7 +101,7 @@ const categories = [
         </div>
       </div>
     </section>
-    <section class="pt-20 bg-white dark:bg-[#1A1614] transition-colors">
+    <section class="pt-20 pb-10 bg-white dark:bg-[#1A1614] transition-colors">
       <NewsSlider/>
     </section>
 
