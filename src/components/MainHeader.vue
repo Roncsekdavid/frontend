@@ -102,9 +102,12 @@ onMounted(async () => {
   document.addEventListener('click', (e) => {
     const dropdown = document.getElementById('profil-dropdown-wrap')
     const notificationDropdown = document.getElementById('notification-dropdown-wrap')
-
+    
     if (dropdown && !dropdown.contains(e.target)) closeDropdown()
     if (notificationDropdown && !notificationDropdown.contains(e.target)) closeNotifications()
+    if (auth.isLoggedIn) {
+      await fetchNotifications();
+    }
   })
 });
 
