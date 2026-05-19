@@ -114,6 +114,9 @@ onMounted(async () => {
 
 watch(() => route.path, async () => {
   await auth.fetchUser();
+  if (auth.isLoggedIn) {
+    await fetchNotifications();
+  }
 });
 
 const currencyStore = useCurrencyStore();
